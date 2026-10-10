@@ -1422,55 +1422,6 @@ body.is-loaded .hero-eyebrow, body.is-loaded .hero-line, body.is-loaded .hero-fo
   animation-play-state: running;
 }
 
-/* ---- custom cursor (pointer devices only) ---- */
-.cursor {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 99;
-  width: 10px;
-  height: 10px;
-  margin: -5px 0 0 -5px;
-  border-radius: 50%;
-  background: var(--gold-2);
-  pointer-events: none;
-  mix-blend-mode: difference;
-  opacity: 0;
-  transition: width 0.35s var(--ease), height 0.35s var(--ease), margin 0.35s var(--ease), opacity 0.3s, background 0.3s;
-}
-.cursor-label {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--bg);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-@media (pointer: fine) {
-  body.has-cursor .cursor { opacity: 1; }
-  body.has-cursor .cursor.is-hover {
-    width: 72px;
-    height: 72px;
-    margin: -36px 0 0 -36px;
-    background: var(--ink);
-    mix-blend-mode: normal;
-  }
-  body.has-cursor .cursor.is-hover .cursor-label { opacity: 1; }
-  body.has-cursor .cursor.is-link {
-    width: 36px;
-    height: 36px;
-    margin: -18px 0 0 -18px;
-    background: transparent;
-    border: 1px solid var(--gold-2);
-    mix-blend-mode: normal;
-  }
-  body.has-cursor .cursor.is-down { transform: scale(0.8); }
-}
-
 /* ---- nav hides on scroll down, returns on scroll up ---- */
 .nav {
   transition: background 0.5s var(--ease), border-color 0.5s var(--ease), transform 0.5s var(--ease);
@@ -1593,24 +1544,6 @@ body.is-loaded .hero-cue { animation-play-state: running; }
   transform: translateY(14px) scale(0.985);
   transition-duration: 0.3s;
 }
-.card-media {
-  transform-style: preserve-3d;
-  transition: border-color 0.5s var(--ease), transform 0.25s ease-out, box-shadow 0.6s var(--ease);
-}
-.card-media .card-img {
-  transition: opacity 0.55s var(--ease), transform 0.5s ease-out;
-}
-.card-media::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.1), transparent 55%);
-  opacity: 0;
-  transition: opacity 0.4s;
-}
-.card-media:hover::before { opacity: 1; }
 
 /* ---- lookbook rail: swipe / drag gallery ---- */
 .rail {
@@ -1794,7 +1727,6 @@ body.is-loaded .hero-cue { animation-play-state: running; }
   .hero-eyebrow, .hero-line, .hero-foot, .hero-cue { animation-play-state: running; }
   .statement-text .w > span { transform: none; }
   .grid > .reveal { clip-path: none; }
-  .cursor { display: none; }
 }
 
 
@@ -1908,7 +1840,6 @@ em, .display em, .hero-title em, .closing-title em, .statement-text em {
 .card-media::after { background: none; }
 .card-index { color: var(--muted); }
 .card-cta { background: var(--ink); color: #fff; }
-.card-media::before { background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.55), transparent 55%); }
 .card-cat { color: var(--muted); }
 
 /* statement + story */
@@ -1983,14 +1914,6 @@ em, .display em, .hero-title em, .closing-title em, .statement-text em {
 /* toast */
 .toast { background: rgba(255, 255, 255, 0.96); border-color: var(--line); box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.35); }
 
-/* cursor */
-.cursor { background: var(--ink); mix-blend-mode: normal; }
-@media (pointer: fine) {
-  body.has-cursor .cursor.is-hover { background: var(--ink); }
-  body.has-cursor .cursor.is-link { border-color: var(--ink); }
-}
-.cursor-label { color: #fff; }
-
 /* mobile card label always visible */
 @media (max-width: 480px) { .card-cta { background: var(--ink); } }
 
@@ -2002,7 +1925,6 @@ em, .display em, .hero-title em, .closing-title em, .statement-text em {
 </head>
 <body>
 <div class="loader" id="loader" aria-hidden="true"><span class="loader-mark">TOLAAGRAM</span><span class="loader-line"></span></div>
-<div class="cursor" id="cursor" aria-hidden="true"><span class="cursor-label">View</span></div>
 <div class="site" id="top">
   <div class="grain" aria-hidden="true"></div>
 
@@ -2636,33 +2558,6 @@ if (!reduceMotion) {
     }, 300);
   });
 })();
-
-/* card tilt + light follow (desktop) */
-if (finePointer && !reduceMotion) {
-  grid.addEventListener('mousemove', (e) => {
-    const m = e.target.closest('.card-media'); if (!m) return;
-    const r = m.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
-    m.style.setProperty('--mx', `${px * 100}%`); m.style.setProperty('--my', `${py * 100}%`);
-    m.style.transform = `translateY(-4px) perspective(900px) rotateX(${(0.5 - py) * 6}deg) rotateY(${(px - 0.5) * 6}deg)`;
-  });
-  grid.addEventListener('mouseout', (e) => { const m = e.target.closest('.card-media'); if (m && !m.contains(e.relatedTarget)) m.style.transform = ''; });
-}
-
-/* custom cursor */
-if (finePointer && !reduceMotion) {
-  const cur = $('#cursor'); let cx = innerWidth / 2, cy = innerHeight / 2, tx = cx, ty = cy;
-  document.body.classList.add('has-cursor');
-  window.addEventListener('mousemove', (e) => { tx = e.clientX; ty = e.clientY; }, { passive: true });
-  window.addEventListener('mousedown', () => cur.classList.add('is-down'));
-  window.addEventListener('mouseup', () => cur.classList.remove('is-down'));
-  document.addEventListener('mouseover', (e) => {
-    const v = e.target.closest('[data-cursor="view"]'); const l = e.target.closest('a, button, .swatch, .chip');
-    cur.classList.toggle('is-hover', !!v); cur.classList.toggle('is-link', !v && !!l);
-  });
-  const tick = () => { cx += (tx - cx) * 0.18; cy += (ty - cy) * 0.18; cur.style.transform = `translate(${cx}px, ${cy}px)`; requestAnimationFrame(tick); };
-  tick();
-}
 
 /* lookbook rail: build from the catalogue, drag to scroll, progress bar */
 (() => {
